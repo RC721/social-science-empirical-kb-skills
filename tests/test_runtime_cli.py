@@ -22,6 +22,34 @@ class RuntimeCliTests(unittest.TestCase):
             {"init", "discover", "ingest", "sync", "migrate", "extract", "synthesize", "render", "audit", "eval", "update", "package-skills"},
         )
 
+    def test_every_command_accepts_common_runtime_options_and_ingest_plan(self):
+        parser = build_parser()
+        for command in ("init", "discover", "ingest", "sync", "migrate", "extract", "synthesize", "render", "audit", "eval", "update", "package-skills"):
+            arguments = [
+                "--vault",
+                ".",
+                command,
+                "--run-id",
+                "run-1",
+                "--item-key",
+                "AAAA1111",
+                "--collection-key",
+                "COLL",
+                "--batch-size",
+                "8",
+                "--dry-run",
+            ]
+            if command == "ingest":
+                arguments.append("--plan")
+            parsed = parser.parse_args(arguments)
+            self.assertEqual(parsed.run_id, "run-1", command)
+            self.assertEqual(parsed.item_key, ["AAAA1111"], command)
+            self.assertEqual(parsed.collection_key, "COLL", command)
+            self.assertEqual(parsed.batch_size, 8, command)
+            self.assertTrue(parsed.dry_run, command)
+        ingest = parser.parse_args(["ingest", "--plan"])
+        self.assertTrue(ingest.plan)
+
     def test_search_run_creates_all_reproducibility_artifacts(self):
         with tempfile.TemporaryDirectory() as tmp:
             run = create_search_run(Path(tmp), mode="systematic", run_id="run-1")

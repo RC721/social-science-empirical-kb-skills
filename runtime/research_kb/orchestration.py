@@ -18,8 +18,18 @@ def build_stage_tasks(manifest: dict, stage: str, item_keys: set[str] | None = N
         tasks: list[dict] = []
         for row in rows:
             key = row.get("zotero_item_key", "")
-            for sequence, name in enumerate(UPDATE_STAGES, 1):
-                tasks.append({"item_key": key, "stage": name, "sequence": sequence, "status": "pending"})
+            if row.get("duplicate_candidates") and row.get("review_status") == "needs-review":
+                tasks.append({"item_key": key, "stage": "resolve-identity", "sequence": 1, "status": "needs-review"})
+                continue
+            if row.get("extraction_status") in {"pending", "failed"}:
+                stages = UPDATE_STAGES
+            elif row.get("synthesis_status") in {"pending", "stale"}:
+                stages = ("synthesize", "render", "audit")
+            else:
+                stages = ()
+            status = "needs-review" if row.get("review_status") == "needs-review" else "pending"
+            for sequence, name in enumerate(stages, 1):
+                tasks.append({"item_key": key, "stage": name, "sequence": sequence, "status": status})
         return tasks
     if stage == "extract":
         rows = [row for row in rows if row.get("extraction_status") in {"pending", "failed"}]
@@ -34,11 +44,17 @@ def build_stage_tasks(manifest: dict, stage: str, item_keys: set[str] | None = N
 
 def create_run(vault: Path, command: str, run_id: str, tasks: list[dict], batch_size: int, apply: bool) -> dict:
     """Preview or persist an auditable run descriptor."""
+    if batch_size < 1:
+        raise ValueError("batch_size must be positive")
+    item_keys = sorted({task.get("item_key", "") for task in tasks if task.get("item_key")})
+    batches = {key: index // batch_size + 1 for index, key in enumerate(item_keys)}
+    batched_tasks = [{**task, "batch": batches.get(task.get("item_key", ""), 0)} for task in tasks]
     report = {
         "schema_version": 1,
         "run_id": run_id,
         "command": command,
         "batch_size": batch_size,
+        "batch_count": max(batches.values(), default=0),
         "task_count": len(tasks),
         "mode": "apply" if apply else "dry-run",
         "run_directory": "",
@@ -51,7 +67,7 @@ def create_run(vault: Path, command: str, run_id: str, tasks: list[dict], batch_
     report["run_directory"] = str(run_dir)
     (run_dir / "run.json").write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     (run_dir / "tasks.jsonl").write_text(
-        "".join(json.dumps(task, ensure_ascii=False, sort_keys=True) + "\n" for task in tasks),
+        "".join(json.dumps(task, ensure_ascii=False, sort_keys=True) + "\n" for task in batched_tasks),
         encoding="utf-8",
     )
     return report

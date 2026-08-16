@@ -135,33 +135,40 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--vault", type=Path, default=Path.cwd())
     sub = parser.add_subparsers(dest="command", required=True)
 
+    def add_common(command: argparse.ArgumentParser) -> None:
+        command.add_argument("--run-id", default="")
+        command.add_argument("--item-key", action="append", default=[])
+        command.add_argument("--collection-key", default="")
+        command.add_argument("--batch-size", type=int, default=10)
+        command.add_argument("--dry-run", action="store_true")
+
     init = sub.add_parser("init")
-    init.add_argument("--collection-key", default="")
+    add_common(init)
     init.add_argument("--domain", default="general")
 
     discover = sub.add_parser("discover")
+    add_common(discover)
     discover.add_argument("--mode", choices=("exploratory", "focused", "systematic"), default="focused")
-    discover.add_argument("--run-id", default="")
 
     migrate = sub.add_parser("migrate")
+    add_common(migrate)
     migrate.add_argument("--apply", action="store_true")
     migrate.add_argument("--source-snapshot-id", default="")
 
     for name in ("ingest", "extract", "synthesize", "render", "audit", "eval", "update"):
         command = sub.add_parser(name)
-        command.add_argument("--run-id", default="")
-        command.add_argument("--item-key", action="append", default=[])
-        command.add_argument("--batch-size", type=int, default=10)
-        command.add_argument("--dry-run", action="store_true")
+        add_common(command)
         command.add_argument("--apply", action="store_true")
+        if name == "ingest":
+            command.add_argument("--plan", action="store_true")
     sync = sub.add_parser("sync")
+    add_common(sync)
     sync.add_argument("--source-snapshot-id", default="")
-    sync.add_argument("--dry-run", action="store_true")
     sync.add_argument("--apply", action="store_true")
 
     package = sub.add_parser("package-skills")
+    add_common(package)
     package.add_argument("--output", type=Path)
-    package.add_argument("--dry-run", action="store_true")
     package.add_argument("--apply", action="store_true")
     return parser
 
@@ -172,19 +179,38 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     vault = args.vault.resolve()
     if args.command == "init":
+        if args.dry_run:
+            print(
+                json.dumps(
+                    {
+                        "mode": "dry-run",
+                        "workspace": str(vault / "90_Codex工作区"),
+                        "collection_key": args.collection_key,
+                        "domain": args.domain,
+                    },
+                    ensure_ascii=False,
+                    indent=2,
+                )
+            )
+            return 0
         result = initialize_workspace(vault, args.collection_key, args.domain)
         print(json.dumps({key: str(value) for key, value in result.items()}, ensure_ascii=False, indent=2))
         return 0
     if args.command == "discover":
-        run = create_search_run(vault, args.mode, args.run_id or _timestamp_id())
-        print(json.dumps({"search_run": str(run), "mode": args.mode}, ensure_ascii=False, indent=2))
+        run_id = args.run_id or _timestamp_id()
+        if args.dry_run:
+            report = {"mode": "dry-run", "search_run": str(vault / "90_Codex工作区" / "search_runs" / run_id), "search_mode": args.mode}
+        else:
+            run = create_search_run(vault, args.mode, run_id)
+            report = {"mode": "apply", "search_run": str(run), "search_mode": args.mode}
+        print(json.dumps(report, ensure_ascii=False, indent=2))
         return 0
     if args.command == "migrate":
-        report = run_migration(vault, args.apply, args.source_snapshot_id or _timestamp_id())
+        report = run_migration(vault, args.apply and not args.dry_run, args.source_snapshot_id or args.run_id or _timestamp_id())
         print(json.dumps(report, ensure_ascii=False, indent=2))
         return 0
     if args.command == "sync":
-        report = run_migration(vault, args.apply, args.source_snapshot_id or _timestamp_id())
+        report = run_migration(vault, args.apply and not args.dry_run, args.source_snapshot_id or args.run_id or _timestamp_id())
         print(json.dumps(report, ensure_ascii=False, indent=2))
         return 0
     if args.command == "audit":
@@ -215,7 +241,7 @@ def main(argv: list[str] | None = None) -> int:
             args.run_id or _timestamp_id(),
             tasks,
             args.batch_size,
-            apply=args.apply and not args.dry_run,
+            apply=args.apply and not args.dry_run and not getattr(args, "plan", False),
         )
         print(json.dumps(report, ensure_ascii=False, indent=2))
         return 0
