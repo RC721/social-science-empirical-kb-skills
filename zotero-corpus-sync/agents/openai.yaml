@@ -1,0 +1,6 @@
+interface:
+  display_name: "Zotero Corpus Sync"
+  short_description: "安全同步Zotero身份、元数据、PDF与增量语料状态"
+  default_prompt: "Use $zotero-corpus-sync to plan and synchronize a research corpus with Zotero."
+policy:
+  allow_implicit_invocation: true

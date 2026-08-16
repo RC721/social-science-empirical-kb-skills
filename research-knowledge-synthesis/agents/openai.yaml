@@ -1,0 +1,6 @@
+interface:
+  display_name: "Research Knowledge Synthesis"
+  short_description: "把论文证据综合为论断、概念、矩阵、综述与研究问题"
+  default_prompt: "Use $research-knowledge-synthesis to integrate audited paper evidence into a structured research knowledge base."
+policy:
+  allow_implicit_invocation: true

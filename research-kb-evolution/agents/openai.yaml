@@ -1,0 +1,6 @@
+interface:
+  display_name: "Research KB Evolution"
+  short_description: "依据纠错账本和黄金评测安全改进科研知识库Skills"
+  default_prompt: "Use $research-kb-evolution to propose, test, and promote evidence-based improvements to the research KB skills."
+policy:
+  allow_implicit_invocation: true

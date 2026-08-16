@@ -1,0 +1,6 @@
+interface:
+  display_name: "Social Science Empirical KB"
+  short_description: "编排社会科学证据型科研知识库的完整增量工作流"
+  default_prompt: "Use $social-science-empirical-kb to build or update an auditable Zotero-backed Obsidian research knowledge base."
+policy:
+  allow_implicit_invocation: true

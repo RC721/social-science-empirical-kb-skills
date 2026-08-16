@@ -1,0 +1,6 @@
+interface:
+  display_name: "Social Science Paper Extraction"
+  short_description: "从论文全文提取可回查的研究设计、模型、变量与发现"
+  default_prompt: "Use $social-science-paper-extraction to extract evidence-grounded study information from Zotero papers."
+policy:
+  allow_implicit_invocation: true

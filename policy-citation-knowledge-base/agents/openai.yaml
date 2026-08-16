@@ -1,0 +1,6 @@
+interface:
+  display_name: "Policy Citation Knowledge Base"
+  short_description: "兼容原政策引用知识库并调用通用社会科学实证流程"
+  default_prompt: "Use $policy-citation-knowledge-base to update the policy-citation vault through the general social science empirical KB workflow."
+policy:
+  allow_implicit_invocation: true

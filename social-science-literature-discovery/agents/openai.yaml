@@ -1,0 +1,6 @@
+interface:
+  display_name: "Social Science Literature Discovery"
+  short_description: "执行可复现的社会科学多源检索、筛选与覆盖评估"
+  default_prompt: "Use $social-science-literature-discovery to discover and screen literature for a social science research topic."
+policy:
+  allow_implicit_invocation: true

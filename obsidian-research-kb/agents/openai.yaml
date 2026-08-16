@@ -1,0 +1,6 @@
+interface:
+  display_name: "Obsidian Research KB"
+  short_description: "安全渲染和审计Obsidian科研知识层与状态面板"
+  default_prompt: "Use $obsidian-research-kb to render and audit research knowledge artifacts in an Obsidian vault."
+policy:
+  allow_implicit_invocation: true

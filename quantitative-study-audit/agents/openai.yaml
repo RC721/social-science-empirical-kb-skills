@@ -1,0 +1,6 @@
+interface:
+  display_name: "Quantitative Study Audit"
+  short_description: "审计定量论文设计、识别策略、稳健性与因果边界"
+  default_prompt: "Use $quantitative-study-audit to audit the design and causal claims of a quantitative social science study."
+policy:
+  allow_implicit_invocation: true

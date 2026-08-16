@@ -1,0 +1,26 @@
+{
+  "schema_version": "1.0.0",
+  "item_key": "",
+  "design_family": "unclear",
+  "estimand": null,
+  "treatment_or_exposure": null,
+  "comparison_or_counterfactual": null,
+  "identification_strategy": null,
+  "identification_assumptions": [],
+  "model_checks": {
+    "fixed_or_random_effects": null,
+    "clustered_standard_errors": null,
+    "weights": null,
+    "sample_restrictions": null,
+    "missing_data": null
+  },
+  "diagnostics": [],
+  "robustness": [],
+  "heterogeneity": [],
+  "mechanism_tests": [],
+  "author_claim_type": "descriptive",
+  "design_identification_status": "unclear",
+  "causal_language_gate": "prohibited",
+  "codex_assessment": [],
+  "needs_review": []
+}

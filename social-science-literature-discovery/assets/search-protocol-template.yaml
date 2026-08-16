@@ -1,0 +1,26 @@
+schema_version: 1.0.0
+run_id: ""
+mode: exploratory
+research_question: ""
+languages: []
+date_limits:
+  start: null
+  end: null
+concept_clusters:
+  population: []
+  outcome: []
+  exposure: []
+  mechanism: []
+  measurement: []
+  geography: []
+  design: []
+sources: []
+eligibility:
+  include: []
+  exclude: []
+seed_records: []
+human_approval:
+  required: false
+  status: not-required
+  approved_by: null
+  approved_at: null
